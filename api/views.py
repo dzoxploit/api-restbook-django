@@ -5,6 +5,7 @@ from books.models import Book
 from .serializers import BookSerializer
 from rest_framework import serializers
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 
 @api_view(['GET'])
 def getRoutes(request):
@@ -14,12 +15,21 @@ def getRoutes(request):
             {'POST': 'api/users/token'}
         ]
     return Response(routes)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getBooks(request):
-    books = Book.objects.all()
-    serialize = BookSerializer(books, many=True)
-    return Response(serialize.data)
+    if request.query_params:
+        books = Book.objects.filter(**request.query_params.dict())
+    else:
+        books = Book.objects.all()
+ 
+    # if there is something in items else raise error
+    if books:
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -35,3 +45,24 @@ def add_books(request):
         return Response(books.data)
     else:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_books(request, pk):
+    book = Book.objects.get(pk=pk)
+    data = BookSerializer(instance=book, data=request.data)
+ 
+    if data.is_valid():
+        data.save()
+        return Response(data.data)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_books(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    book.delete()
+    return Response(status=status.HTTP_202_ACCEPTED)
