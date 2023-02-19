@@ -17,7 +17,6 @@ def getRoutes(request):
     return Response(routes)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getBooks(request):
     if request.query_params:
         books = Book.objects.filter(**request.query_params.dict())
@@ -32,7 +31,6 @@ def getBooks(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def add_books(request):
     books = BookSerializer(data=request.data)
  
@@ -48,7 +46,6 @@ def add_books(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def update_books(request, pk):
     book = Book.objects.get(pk=pk)
     data = BookSerializer(instance=book, data=request.data)
@@ -61,7 +58,6 @@ def update_books(request, pk):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
 def delete_books(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book.delete()
