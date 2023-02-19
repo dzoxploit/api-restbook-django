@@ -89,7 +89,7 @@ TEMPLATES = [
         },
     },
 ]
-
+APPEND_SLASH=False 
 WSGI_APPLICATION = 'adminrestbook.wsgi.application'
 
 
